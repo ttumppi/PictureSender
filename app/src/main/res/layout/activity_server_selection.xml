@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        tools:context=".ServerSelectionActivity" android:id="@+id/MainLayout">
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" app:layout_anchorGravity="center" android:id="@+id/constraintLayout"
+            app:layout_anchor="@+id/constraintLayout">
+
+        <TextView
+                android:text="Debug"
+                android:layout_width="340dp"
+                android:layout_height="478dp" android:id="@+id/DebugText"
+                app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="10dp"
+                app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="10dp"/>
+        <androidx.fragment.app.FragmentContainerView
+                android:layout_width="412dp"
+                android:layout_height="103dp" android:name="com.example.PictureSender.TopOfScreenFrag"
+                android:id="@+id/fragmentContainerView"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+                tools:layout="@layout/fragment_top_of_screen"/>
+        <Button
+                android:text="Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/button"
+                app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="55dp"
+                android:layout_marginTop="67dp" app:layout_constraintTop_toBottomOf="@+id/fragmentContainerView"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

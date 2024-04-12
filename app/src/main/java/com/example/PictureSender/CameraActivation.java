@@ -11,7 +11,7 @@ import androidx.core.content.FileProvider;
 import java.io.File;
 import java.io.PrintWriter;
 
-public class CameraActivity extends Activity {
+public class CameraActivation extends Activity {
 
     private static final int CAMERA_REQUEST = 1888;
 

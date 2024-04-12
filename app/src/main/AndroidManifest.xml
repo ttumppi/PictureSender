@@ -1,26 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
-          <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-          <uses-feature android:name="android.hardware.camera"/>
-          <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
-          <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32"
-                           tools:ignore="ScopedStorage"/>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <uses-feature android:name="android.hardware.camera"/>
+
+    <uses-permission
+            android:name="android.permission.READ_EXTERNAL_STORAGE"
+            android:maxSdkVersion="32"/>
+    <uses-permission
+            android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+            android:maxSdkVersion="32"
+            tools:ignore="ScopedStorage"/>
+    <uses-permission
+            android:name="android.permission.ACCESS_WIFI_STATE"
+            android:required="true"/>
+    <uses-permission
+            android:name="android.permission.CHANGE_WIFI_STATE"
+            android:required="true"/>
+    <uses-permission
+            android:name="android.permission.INTERNET"
+            android:required="true"/>
 
 
 
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
+    <!-- If your app targets Android 13 (API level 33)
+         or higher, you must declare the NEARBY_WIFI_DEVICES permission. -->
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
+                     android:usesPermissionFlags="neverForLocation" />
 
-
-        <uses-permission
-                android:required="true"
-                android:name="android.permission.ACCESS_WIFI_STATE"/>
-        <uses-permission
-                android:required="true"
-                android:name="android.permission.CHANGE_WIFI_STATE"/>
-        <uses-permission
-                android:required="true"
-                android:name="android.permission.INTERNET"/>
+    <!-- If your app derives location information from
+         Wi-Fi APIs, don't include the "usesPermissionFlags"
+         attribute. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
 
     <application
@@ -34,6 +52,11 @@
             android:theme="@style/Theme.MyApplication"
             tools:targetApi="31">
         <activity
+                android:name=".ServerSelectionActivity"
+                android:exported="false"
+                android:label="@string/title_activity_server_selection"
+                android:theme="@style/Theme.MyApplication"/>
+        <activity
                 android:name=".MainActivity"
                 android:exported="true"
                 android:theme="@style/Theme.MyApplication">
@@ -43,9 +66,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-                android:name=".CameraActivity"
-        />
+        <activity android:name=".CameraActivation"/>
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.provider"
@@ -55,7 +77,6 @@
                     android:name="android.support.FILE_PROVIDER_PATHS"
                     android:resource="@xml/file_paths"/>
         </provider>
-
     </application>
 
 </manifest>

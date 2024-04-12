@@ -5,13 +5,13 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public class ClientSocket {
-    private Socket clientSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+    private Socket _clientSocket;
+
+
 
 
     public void startConnection(String ip, int port) throws IOException {
-        clientSocket = new Socket(ip, port);
+        _clientSocket = new Socket(ip, port);
 
 
     }
@@ -19,31 +19,60 @@ public class ClientSocket {
     public void sendMessage(byte[] data, String endMessage) throws IOException {
 
             String chars = "";
-            byte[] answer = new byte[3];
-            clientSocket.getOutputStream().write(data);
-            clientSocket.getOutputStream().write(endMessage.getBytes());
-            clientSocket.getOutputStream().flush();
+            byte[] answer = new byte[endMessage.length()];
+            _clientSocket.getOutputStream().write(data);
+            _clientSocket.getOutputStream().write(endMessage.getBytes());
+            _clientSocket.getOutputStream().flush();
 
-
-            while (clientSocket.getInputStream().read(answer) != 0){
+            while (_clientSocket.getInputStream().read(answer) != 0){
                 chars += new String(answer, StandardCharsets.UTF_8);
                 if (chars.equals(endMessage)){
                     break;
                 }
-                answer = new byte[3];
+                answer = new byte[endMessage.length()];
 
 
             }
+
+    }
+
+    public void Poll(){
+        try{
+            _clientSocket.getOutputStream().write(";;;".getBytes());
+            _clientSocket.getOutputStream().flush();
+        }
+        catch(Exception e){
+
+        }
+
+    }
+
+    public boolean TryPoll(String message, String ip, int port){
+        try{
+            startConnection(ip, port);
+            byte[] answer = new byte[message.length()];
+            _clientSocket.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
+            _clientSocket.getOutputStream().flush();
+            Thread.sleep(5000L);
+
+
+
+
+            _clientSocket.getInputStream().read(answer);
+
+            return new String(answer, StandardCharsets.UTF_8).equals(message);
+        }
+        catch(Exception e){
+            return false;
+        }
 
 
 
     }
 
-
-
     public void stopConnection() throws IOException {
 
 
-        clientSocket.close();
+        _clientSocket.close();
     }
 }

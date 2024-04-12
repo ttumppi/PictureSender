@@ -13,12 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 
 public class MainActivity extends AppCompatActivity {
 
 
-    private TextView _text;
+    private TextView _errors;
     public static int CAMERACODE = 1;
     private String _endMessage = ";;;";
     private ClientSocket _client;
@@ -29,22 +30,39 @@ public class MainActivity extends AppCompatActivity {
 
     private Bitmap _bmp;
 
+    private ImageView _openCameraImage;
+
+    private String _ip;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent serverSearch = new Intent(this, ServerSelectionActivity.class);
+        startActivityForResult(serverSearch, ServerSelectionActivity.SELECTION_CODE);
+
         setContentView(R.layout.activity_main);
 
-        _text = findViewById(R.id.textView);
 
-        ImageView droid = findViewById(R.id.droidImage);
+        _errors = findViewById(R.id.ErrorText);
+        _errors.setText("");
+
+        _openCameraImage = findViewById(R.id.CameraImage);
 
         //Define and attach click listener
-        droid.setOnClickListener(new View.OnClickListener() {
+        _openCameraImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tapDroid();
+                StartImageCapture();
+            }
+        });
+
+        findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                _errors.setText(test);
             }
         });
 
@@ -53,15 +71,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void tapDroid() {
+    private void StartImageCapture() {
 
         try{
-            _cameraActivity = new Intent(this, CameraActivity.class);
+            _openCameraImage.setEnabled(false);
+            _cameraActivity = new Intent(this, CameraActivation.class);
             startActivityForResult(_cameraActivity, CAMERACODE);
 
         }
         catch(Exception e){
-            _text.setText(e.getMessage());
+            _errors.setText(e.getMessage());
         }
 
 
@@ -81,15 +100,20 @@ public class MainActivity extends AppCompatActivity {
                 String path = data.getStringExtra("file");
 
 
+                _openCameraImage.setEnabled(false);
                 Thread thread = new Thread(() -> {
                     try {
-
+                        byte[] imgTag = "IMG_".getBytes(StandardCharsets.UTF_8);
                         byte[] orientationData = new byte[] {(byte)GetImageOrientationBit(path)};
                         byte[] orientationTag = "WO_".getBytes();
                         ByteArrayOutputStream imageStream = CompressImage(path);
                         byte[] imageData = imageStream.toByteArray();
                         int destPos = 0;
-                        byte[] combinedData = new byte[orientationData.length + imageData.length + orientationTag.length];
+                        byte[] combinedData = new byte[imgTag.length + orientationData.length
+                                + imageData.length + orientationTag.length];
+
+                        System.arraycopy(imgTag, 0, combinedData, destPos, imgTag.length);
+                        destPos += imgTag.length;
 
                         System.arraycopy(orientationTag, 0, combinedData, destPos, orientationTag.length);
                         destPos += orientationTag.length;
@@ -100,23 +124,31 @@ public class MainActivity extends AppCompatActivity {
                         System.arraycopy(imageData, 0, combinedData, destPos, imageData.length);
 
 
-                        _client.startConnection("192.168.1.103", 77);
+                        _client.startConnection(_ip, 23399);
                         _client.sendMessage(combinedData, _endMessage);
 
                         _client.stopConnection();
                         _bmp.recycle();
+                        ((Activity) MainActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                _openCameraImage.setEnabled(true);
+                            }
+                        });
 
-
-                    } catch (Exception e)
+                    }
+                    catch (Exception e)
                     {
-                        _text.setText(e.toString() + "exception1");
+                        _errors.setText(e.toString() + "exception1");
                     }
                 });
                 try{
                     thread.start();
+                    //Thread.sleep(10000L);
+
                 }
                 catch(Exception e){
-                    _text.setText(e.getMessage());
+                    _errors.setText(e.getMessage());
                 }
 
 
@@ -124,9 +156,16 @@ public class MainActivity extends AppCompatActivity {
 
             }
             catch(Exception e){
-                _text.setText(e.toString() + " exception2");
+                _errors.setText(e.toString() + " exception2");
             }
 
+        }
+
+        if (requestCode == CAMERACODE && resultCode == Activity.RESULT_CANCELED){
+            _openCameraImage.setEnabled(true);
+        }
+        if (requestCode == ServerSelectionActivity.SELECTION_CODE & resultCode == Activity.RESULT_OK){
+            _ip = data.getStringExtra("ip");
         }
 
 
