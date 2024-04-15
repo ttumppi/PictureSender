@@ -6,69 +6,50 @@ import java.nio.charset.StandardCharsets;
 
 public class ClientSocket {
     private Socket _clientSocket;
+    String _endMessage;
 
+    public ClientSocket(String endMessage){
+        _endMessage = endMessage;
+    }
 
-
-
-    public void startConnection(String ip, int port) throws IOException {
+    public void StartConnection(String ip, int port) throws IOException {
         _clientSocket = new Socket(ip, port);
 
 
     }
 
-    public void sendMessage(byte[] data, String endMessage) throws IOException {
 
-            String chars = "";
-            byte[] answer = new byte[endMessage.length()];
+
+
+
+    public synchronized boolean SendMessage(byte[] data) throws IOException{
+
+        byte[] answer = new byte[_endMessage.getBytes(StandardCharsets.UTF_8).length];
+        StringBuilder chars = new StringBuilder();
+        if (data.length != 0){
             _clientSocket.getOutputStream().write(data);
-            _clientSocket.getOutputStream().write(endMessage.getBytes());
-            _clientSocket.getOutputStream().flush();
+        }
 
-            while (_clientSocket.getInputStream().read(answer) != 0){
-                chars += new String(answer, StandardCharsets.UTF_8);
-                if (chars.equals(endMessage)){
-                    break;
-                }
-                answer = new byte[endMessage.length()];
-
-
+        _clientSocket.getOutputStream().write(_endMessage.getBytes(StandardCharsets.UTF_8));
+        _clientSocket.getOutputStream().flush();
+        long startTime = System.currentTimeMillis();
+        while (_clientSocket.getInputStream().read(answer) != -1){
+            chars.append( new String(answer, StandardCharsets.UTF_8));
+            if (chars.toString().equals(_endMessage)){
+                return true;
             }
+            answer = new byte[_endMessage.getBytes(StandardCharsets.UTF_8).length];
+            if (System.currentTimeMillis() - startTime > 5000L){
+                return false;
+            }
+        }
 
+
+
+        return false;
     }
 
-    public void Poll(){
-        try{
-            _clientSocket.getOutputStream().write(";;;".getBytes());
-            _clientSocket.getOutputStream().flush();
-        }
-        catch(Exception e){
 
-        }
-
-    }
-
-    public boolean TryPoll(String message, String ip, int port){
-        try{
-            startConnection(ip, port);
-            byte[] answer = new byte[message.length()];
-            _clientSocket.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
-            _clientSocket.getOutputStream().flush();
-            Thread.sleep(5000L);
-
-
-
-
-            _clientSocket.getInputStream().read(answer);
-
-            return new String(answer, StandardCharsets.UTF_8).equals(message);
-        }
-        catch(Exception e){
-            return false;
-        }
-
-
-
-    }
 
     public void stopConnection() throws IOException {
 

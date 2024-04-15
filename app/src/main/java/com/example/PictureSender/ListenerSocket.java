@@ -14,6 +14,8 @@ public class ListenerSocket {
     private DatagramSocket _serverSocket;
     private String _endOfMessage;
 
+    private Thread _listeningThread;
+
     private List<String> _blackList;
     public ListenerSocket(int port, String endOfMessage){
         _port = port;
@@ -22,6 +24,7 @@ public class ListenerSocket {
         try{
             _serverSocket = new DatagramSocket(port);
             _serverSocket.setBroadcast(true);
+            _listeningThread = CreateThread();
         }
         catch(Exception e){
             ServerSelectionActivity.ForDebugging = e.getMessage();
@@ -30,7 +33,12 @@ public class ListenerSocket {
 
     public void StartListening(GetIpCallBack onReady){
         _onReady = onReady;
-        new Thread(()->{
+        _listeningThread.start();
+
+    }
+
+    private Thread CreateThread(){
+        return new Thread(()->{
             try{
                 StringBuilder message = new StringBuilder();
                 byte[] data = new byte[50];
@@ -49,23 +57,17 @@ public class ListenerSocket {
 
                 String ip = packet.getAddress().toString().replace("/", "");
                 if (_blackList.contains(ip)){
+                    _listeningThread.start();
                     return;
                 }
-                Socket socket = new Socket(ip, 23399);
-                OutputStream connection = socket.getOutputStream();
 
-                StringBuilder response = new StringBuilder();
-                response.append("IP_");
-                response.append(_endOfMessage);
-                connection.write(response.toString().getBytes(StandardCharsets.UTF_8));
 
                 _onReady.GetIp(ip);
             }
             catch(Exception e){
                 ServerSelectionActivity.ForDebugging += e.getMessage();
             }
-        }).start();
-
+        });
     }
     private String RemoveEndOfMessage(String data){
         return data.replace(_endOfMessage, "");

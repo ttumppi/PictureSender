@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView _errors;
     public static int CAMERACODE = 1;
-    private String _endMessage = ";;;";
+    private final String _endMessage = ";;;";
     private ClientSocket _client;
     int length = 0;
     private Intent _cameraActivity;
@@ -59,14 +59,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                _errors.setText(test);
-            }
-        });
 
-        _client = new ClientSocket();
+
+        _client = new ClientSocket(_endMessage);
 
 
     }
@@ -95,69 +90,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == CAMERACODE && resultCode == Activity.RESULT_OK) {
-            try{
 
-                String path = data.getStringExtra("file");
-
-
-                _openCameraImage.setEnabled(false);
-                Thread thread = new Thread(() -> {
-                    try {
-                        byte[] imgTag = "IMG_".getBytes(StandardCharsets.UTF_8);
-                        byte[] orientationData = new byte[] {(byte)GetImageOrientationBit(path)};
-                        byte[] orientationTag = "WO_".getBytes();
-                        ByteArrayOutputStream imageStream = CompressImage(path);
-                        byte[] imageData = imageStream.toByteArray();
-                        int destPos = 0;
-                        byte[] combinedData = new byte[imgTag.length + orientationData.length
-                                + imageData.length + orientationTag.length];
-
-                        System.arraycopy(imgTag, 0, combinedData, destPos, imgTag.length);
-                        destPos += imgTag.length;
-
-                        System.arraycopy(orientationTag, 0, combinedData, destPos, orientationTag.length);
-                        destPos += orientationTag.length;
-
-                        System.arraycopy(orientationData, 0, combinedData, destPos, orientationData.length);
-                        destPos += orientationData.length;
-
-                        System.arraycopy(imageData, 0, combinedData, destPos, imageData.length);
-
-
-                        _client.startConnection(_ip, 23399);
-                        _client.sendMessage(combinedData, _endMessage);
-
-                        _client.stopConnection();
-                        _bmp.recycle();
-                        ((Activity) MainActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                _openCameraImage.setEnabled(true);
-                            }
-                        });
-
-                    }
-                    catch (Exception e)
-                    {
-                        _errors.setText(e.toString() + "exception1");
-                    }
-                });
-                try{
-                    thread.start();
-                    //Thread.sleep(10000L);
-
-                }
-                catch(Exception e){
-                    _errors.setText(e.getMessage());
-                }
-
-
-
-
-            }
-            catch(Exception e){
-                _errors.setText(e.toString() + " exception2");
-            }
+            SendImage(data);
 
         }
 
@@ -166,12 +100,138 @@ public class MainActivity extends AppCompatActivity {
         }
         if (requestCode == ServerSelectionActivity.SELECTION_CODE & resultCode == Activity.RESULT_OK){
             _ip = data.getStringExtra("ip");
+            EstablishConnection();
+            _errors.setText(_errors.getText() + "going to start handshake");
+            SendHandshake();
+            StartPolling();
         }
 
 
 
 
 
+    }
+
+    private void EstablishConnection(){
+
+            Thread thread = new Thread(()->{
+                try {
+                    _client.StartConnection(_ip, 23399);
+                }
+                catch(Exception e){
+                    _errors.setText("Failed to start connection");
+                }
+            });
+            try{
+                thread.start();
+
+                thread.join();
+                _errors.setText("established connection");
+            }
+            catch(Exception e){
+
+            }
+
+
+
+    }
+
+    private void SendHandshake(){
+        new Thread(() ->{
+            try{
+                runOnUiThread(()-> {_errors.setText("Sending handshake");});
+                boolean b = _client.SendMessage("IP_".getBytes(StandardCharsets.UTF_8));
+                runOnUiThread(()-> {_errors.setText(String.valueOf(b));});
+            }
+            catch(Exception e){
+                _errors.setText("something wrong in handshake");
+            }
+        }).start();
+    }
+    private void StartPolling(){
+        try{
+
+            new Thread(() -> {
+                try{
+                    while (_client.SendMessage(new byte[0])){
+                            try {
+                                Thread.sleep(5000L);
+                            }
+                            catch(Exception e){
+                                _errors.setText("sleep failed");
+                            }
+                    }
+                    runOnUiThread(()-> {_errors.setText("sending message failed");});
+                }
+                catch(Exception e){
+                    runOnUiThread(()-> {_errors.setText("Could not connect to server");});
+                }
+            }).start();
+        }
+        catch(Exception e){
+            _errors.setText("Something went wrong in starting thread");
+        }
+    }
+    private void SendImage(Intent data){
+        try{
+
+            String path = data.getStringExtra("file");
+
+            _openCameraImage.setEnabled(false);
+            Thread thread = new Thread(() -> {
+                try {
+                    byte[] imgTag = "IMG_".getBytes(StandardCharsets.UTF_8);
+                    byte[] orientationData = new byte[] {(byte)GetImageOrientationBit(path)};
+                    byte[] orientationTag = "WO_".getBytes();
+                    ByteArrayOutputStream imageStream = CompressImage(path);
+                    byte[] imageData = imageStream.toByteArray();
+                    int destPos = 0;
+                    byte[] combinedData = new byte[imgTag.length + orientationData.length
+                            + imageData.length + orientationTag.length];
+
+                    System.arraycopy(imgTag, 0, combinedData, destPos, imgTag.length);
+                    destPos += imgTag.length;
+
+                    System.arraycopy(orientationTag, 0, combinedData, destPos, orientationTag.length);
+                    destPos += orientationTag.length;
+
+                    System.arraycopy(orientationData, 0, combinedData, destPos, orientationData.length);
+                    destPos += orientationData.length;
+
+                    System.arraycopy(imageData, 0, combinedData, destPos, imageData.length);
+
+
+                    if (!_client.SendMessage(combinedData)){
+                        _errors.setText("Sending image failed");
+                    }
+
+
+                    _bmp.recycle();
+                    ((Activity) MainActivity.this).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            _openCameraImage.setEnabled(true);
+                        }
+                    });
+
+                }
+                catch (Exception e)
+                {
+                    _errors.setText(e.toString() + "exception1");
+                }
+            });
+            try{
+                thread.start();
+
+
+            }
+            catch(Exception e){
+                _errors.setText(e.getMessage());
+            }
+        }
+        catch(Exception e){
+            _errors.setText(e.toString() + " exception2");
+        }
     }
 
     private int GetImageOrientationBit(String path){

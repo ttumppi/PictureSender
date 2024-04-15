@@ -60,14 +60,7 @@ public class ServerSelectionActivity extends AppCompatActivity{
 
         _debug = findViewById(R.id.DebugText);
         _debug.setText("");
-        button = findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                _debug.setText(ForDebugging);
-            }
 
-        });
 
 
 
