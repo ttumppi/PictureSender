@@ -51,8 +51,7 @@ public class ClientSocket {
 
 
 
-    public void stopConnection() throws IOException {
-
+    public void Close() throws IOException {
 
         _clientSocket.close();
     }

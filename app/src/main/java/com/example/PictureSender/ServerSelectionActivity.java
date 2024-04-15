@@ -4,44 +4,31 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.*;
 import android.content.pm.PackageManager;
-import android.net.MacAddress;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.*;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import android.net.wifi.p2p.WifiP2pManager.Channel;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.ActivityOptionsCompat;
-import org.jetbrains.annotations.NotNull;
-
-import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 
 public class ServerSelectionActivity extends AppCompatActivity{
 
-    private TextView _debug;
+
 
     private boolean _highPermission;
 
     private static final int MULTIPLE_REQUESTS = 15;
 
 
-    private Button button;
+
 
     private ListenerSocket _listenerSocket;
-    public static String ForDebugging = "debugs";
+
 
     WifiManager wm = null;
     WifiManager.MulticastLock multicastLock = null;
@@ -57,12 +44,6 @@ public class ServerSelectionActivity extends AppCompatActivity{
         _highPermission = CheckCorrectPermissions();
 
         setContentView(R.layout.activity_server_selection);
-
-        _debug = findViewById(R.id.DebugText);
-        _debug.setText("");
-
-
-
 
         CheckPermissions();
         _listenerSocket = new ListenerSocket(23499, ";;;");
@@ -86,7 +67,8 @@ public class ServerSelectionActivity extends AppCompatActivity{
                                 Intent returnIntent = new Intent();
                                 returnIntent.putExtra("ip", ip);
 
-                                setResult(MainActivity.RESULT_OK, returnIntent);
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                _listenerSocket.Close();
                                 finish();
                                 break;
 
@@ -159,7 +141,7 @@ public class ServerSelectionActivity extends AppCompatActivity{
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
          if (!CheckMultipleRequests(requestCode, grantResults)){
-             _debug.setText("Not sufficient permissions");
+
              return;
          }
     }

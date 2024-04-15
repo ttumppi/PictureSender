@@ -1,5 +1,7 @@
 package com.example.PictureSender;
 
+import android.app.AlertDialog;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
@@ -27,9 +29,11 @@ public class ListenerSocket {
             _listeningThread = CreateThread();
         }
         catch(Exception e){
-            ServerSelectionActivity.ForDebugging = e.getMessage();
+
         }
     }
+
+
 
     public void StartListening(GetIpCallBack onReady){
         _onReady = onReady;
@@ -65,7 +69,7 @@ public class ListenerSocket {
                 _onReady.GetIp(ip);
             }
             catch(Exception e){
-                ServerSelectionActivity.ForDebugging += e.getMessage();
+
             }
         });
     }
@@ -75,5 +79,9 @@ public class ListenerSocket {
 
     public void BlackListIp(String ip){
         _blackList.add(ip);
+    }
+
+    public void Close(){
+        _serverSocket.close();
     }
 }

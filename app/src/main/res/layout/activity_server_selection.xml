@@ -13,11 +13,12 @@
             app:layout_anchor="@+id/constraintLayout">
 
         <TextView
-                android:text="Debug"
-                android:layout_width="340dp"
-                android:layout_height="478dp" android:id="@+id/DebugText"
-                app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="10dp"
-                app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="10dp"/>
+                android:text="Start Searching for this app on the Desktop application, when a connection is found, a popup will appear"
+                android:layout_width="356dp"
+                android:layout_height="111dp" android:id="@+id/InformationText"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="27dp" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginBottom="454dp" android:textAllCaps="true"/>
         <androidx.fragment.app.FragmentContainerView
                 android:layout_width="412dp"
                 android:layout_height="103dp" android:name="com.example.PictureSender.TopOfScreenFrag"

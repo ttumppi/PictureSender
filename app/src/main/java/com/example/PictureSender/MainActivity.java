@@ -1,6 +1,8 @@
 package com.example.PictureSender;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,7 +12,6 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -19,14 +20,12 @@ import java.nio.charset.StandardCharsets;
 public class MainActivity extends AppCompatActivity {
 
 
-    private TextView _errors;
+
     public static int CAMERACODE = 1;
     private final String _endMessage = ";;;";
     private ClientSocket _client;
-    int length = 0;
-    private Intent _cameraActivity;
 
-    public static String test = "test";
+    private Intent _cameraActivity;
 
     private Bitmap _bmp;
 
@@ -40,14 +39,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent serverSearch = new Intent(this, ServerSelectionActivity.class);
-        startActivityForResult(serverSearch, ServerSelectionActivity.SELECTION_CODE);
+        StartServerSearchActivity();
 
         setContentView(R.layout.activity_main);
 
-
-        _errors = findViewById(R.id.ErrorText);
-        _errors.setText("");
 
         _openCameraImage = findViewById(R.id.CameraImage);
 
@@ -59,12 +54,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         _client = new ClientSocket(_endMessage);
 
 
     }
+
+    private void StartServerSearchActivity(){
+        runOnUiThread(()->{
+                Intent serverSearch = new Intent(MainActivity.this, ServerSelectionActivity.class);
+                startActivityForResult(serverSearch, ServerSelectionActivity.SELECTION_CODE);
+        });
+
+    }
+
 
     private void StartImageCapture() {
 
@@ -75,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         catch(Exception e){
-            _errors.setText(e.getMessage());
+            ShowNotificationWithOK("Failed to start camera");
         }
 
 
@@ -88,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == CAMERACODE && resultCode == Activity.RESULT_OK) {
 
             SendImage(data);
@@ -101,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == ServerSelectionActivity.SELECTION_CODE & resultCode == Activity.RESULT_OK){
             _ip = data.getStringExtra("ip");
             EstablishConnection();
-            _errors.setText(_errors.getText() + "going to start handshake");
             SendHandshake();
             StartPolling();
         }
@@ -119,32 +119,45 @@ public class MainActivity extends AppCompatActivity {
                     _client.StartConnection(_ip, 23399);
                 }
                 catch(Exception e){
-                    _errors.setText("Failed to start connection");
+                    ShowNotificationWithOK("Failed to connect");
                 }
             });
             try{
                 thread.start();
-
                 thread.join();
-                _errors.setText("established connection");
             }
             catch(Exception e){
-
+                ShowNotificationWithOK("Failed to start connection");
             }
 
 
 
     }
 
+    private void ShowNotificationWithOK(String text){
+        runOnUiThread(()->{
+            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+            dialog.setMessage(text);
+            dialog.setPositiveButton("OK", null);
+            dialog.show();
+        });
+    }
+
+    private void ShowNotificationWithOK(String text, DialogInterface.OnClickListener listener){
+        runOnUiThread(()->{
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage(text);
+            dialog.setPositiveButton("OK", listener);
+            dialog.show();
+        });
+    }
     private void SendHandshake(){
         new Thread(() ->{
             try{
-                runOnUiThread(()-> {_errors.setText("Sending handshake");});
-                boolean b = _client.SendMessage("IP_".getBytes(StandardCharsets.UTF_8));
-                runOnUiThread(()-> {_errors.setText(String.valueOf(b));});
+                _client.SendMessage("IP_".getBytes(StandardCharsets.UTF_8));
             }
             catch(Exception e){
-                _errors.setText("something wrong in handshake");
+                ShowNotificationWithOK("Failed to execute handshake");
             }
         }).start();
     }
@@ -158,19 +171,32 @@ public class MainActivity extends AppCompatActivity {
                                 Thread.sleep(5000L);
                             }
                             catch(Exception e){
-                                _errors.setText("sleep failed");
+                                ShowNotificationWithOK("Failed to upkeep connection");
                             }
                     }
-                    runOnUiThread(()-> {_errors.setText("sending message failed");});
+                    ShowNotificationWithOK("Connection failed");
                 }
                 catch(Exception e){
-                    runOnUiThread(()-> {_errors.setText("Could not connect to server");});
+                   ShowNotificationWithOK("Connection to server has closed",
+                           CreateOnClickForListeningToConnections());
                 }
             }).start();
         }
         catch(Exception e){
-            _errors.setText("Something went wrong in starting thread");
+            ShowNotificationWithOK("Failed to start connection");
         }
+    }
+    private DialogInterface.OnClickListener CreateOnClickForListeningToConnections(){
+        return new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try{
+                    _client.Close();
+                }
+                catch(Exception e){}
+                StartServerSearchActivity();
+            }
+        };
     }
     private void SendImage(Intent data){
         try{
@@ -202,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                     if (!_client.SendMessage(combinedData)){
-                        _errors.setText("Sending image failed");
+                        ShowNotificationWithOK("failed to send Image");
                     }
 
 
@@ -217,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 catch (Exception e)
                 {
-                    _errors.setText(e.toString() + "exception1");
+                    ShowNotificationWithOK("Something went wrong with creating/sending image");
                 }
             });
             try{
@@ -226,11 +252,11 @@ public class MainActivity extends AppCompatActivity {
 
             }
             catch(Exception e){
-                _errors.setText(e.getMessage());
+                ShowNotificationWithOK("Failed to start sending sequence");
             }
         }
         catch(Exception e){
-            _errors.setText(e.toString() + " exception2");
+            ShowNotificationWithOK("Failed to start sending sequence");
         }
     }
 
