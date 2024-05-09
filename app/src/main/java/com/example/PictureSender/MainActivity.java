@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == CAMERACODE && resultCode == Activity.RESULT_OK) {
 
             SendImage(data);
-
+            StartServerSearchActivity();
         }
 
         if (requestCode == CAMERACODE && resultCode == Activity.RESULT_CANCELED){

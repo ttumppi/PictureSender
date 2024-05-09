@@ -1,87 +1,110 @@
 package com.example.PictureSender;
 
-import android.app.AlertDialog;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.util.Xml;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 public class ListenerSocket {
-    private int _port;
-    private GetIpCallBack _onReady;
-    private DatagramSocket _serverSocket;
-    private String _endOfMessage;
 
-    private Thread _listeningThread;
+    private ServerSocket _socket;
 
-    private List<String> _blackList;
-    public ListenerSocket(int port, String endOfMessage){
-        _port = port;
-        _endOfMessage = endOfMessage;
-        _blackList = new ArrayList<>();
+    OnImageCommandReceived _onCommand;
+
+    private boolean _running;
+
+    private Thread _thread;
+
+    private final String _endMessage = "ACK";
+
+    private final byte[] _endMessageInBytes = _endMessage.getBytes(StandardCharsets.UTF_8);
+
+    public ListenerSocket(OnImageCommandReceived callBack)
+    {
+        _onCommand = callBack;
+        _running = false;
+        _thread = CreateThread();
         try{
-            _serverSocket = new DatagramSocket(port);
-            _serverSocket.setBroadcast(true);
-            _listeningThread = CreateThread();
-        }
-        catch(Exception e){
+            _socket = new ServerSocket(33666);
 
         }
+        catch(Exception e){}
     }
 
-
-
-    public void StartListening(GetIpCallBack onReady){
-        _onReady = onReady;
-        _listeningThread.start();
-
+    public void Start(){
+        _thread.start();
     }
 
     private Thread CreateThread(){
-        return new Thread(()->{
-            try{
-                StringBuilder message = new StringBuilder();
-                byte[] data = new byte[50];
-                DatagramPacket packet = new DatagramPacket(data, data.length);
+        return new Thread(() -> {
+            Socket comm = null;
+           while (_running){
 
-                _serverSocket.receive(packet);
+               if (comm == null){
 
-                message.append(new String(packet.getData(), StandardCharsets.UTF_8));
-                while(!message.toString().contains(_endOfMessage)){
-                    message.append(new String(data, StandardCharsets.UTF_8));
-                    data = new byte[50];
-                    packet = new DatagramPacket(data, data.length);
+                   try{
+                       comm = _socket.accept();
+                   }
+                   catch(Exception e){}
+               }
 
-                    _serverSocket.receive(packet);
-                }
+               if (!CheckConnection(comm)){
+                   comm = null;
+                   continue;
+               }
 
-                String ip = packet.getAddress().toString().replace("/", "");
-                if (_blackList.contains(ip)){
-                    _listeningThread.start();
-                    return;
-                }
+               if (DataAvailable(comm)){
+                   _onCommand.OnCommandReceived();
+                   ClearInputStream(comm);
+                   SendAcknowledge(comm);
+               }
 
-
-                _onReady.GetIp(ip);
-            }
-            catch(Exception e){
-
-            }
+           }
         });
     }
-    private String RemoveEndOfMessage(String data){
-        return data.replace(_endOfMessage, "");
+
+    private boolean DataAvailable(Socket socket){
+        try {
+            return socket.getInputStream().available() > 0;
+        }
+        catch(Exception e){}
+        return false;
     }
 
-    public void BlackListIp(String ip){
-        _blackList.add(ip);
+    private void ClearInputStream(Socket socket){
+        try{
+            while (socket.getInputStream().read() != -1){
+
+            }
+        }
+        catch (Exception e){}
     }
 
-    public void Close(){
-        _serverSocket.close();
+    private void SendAcknowledge(Socket socket){
+        try{
+            socket.getOutputStream().write(_endMessageInBytes);
+            socket.getOutputStream().flush();
+        }
+        catch(Exception e){}
+    }
+
+    private boolean CheckConnection(Socket socket){
+        try{
+            socket.getOutputStream().write(new byte[0]);
+        }
+        catch(Exception e){
+            return false;
+        }
+        return true;
+    }
+
+    public void Shutdown(){
+        _running = false;
+        try{
+            _socket.close();
+        }
+        catch(Exception e){}
     }
 }

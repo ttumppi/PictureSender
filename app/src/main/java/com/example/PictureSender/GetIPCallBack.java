@@ -1,5 +1,7 @@
 package com.example.PictureSender;
 
-public interface GetIpCallBack {
+public interface GetIPCallBack {
     public void GetIp(String ip4);
 }
+
+

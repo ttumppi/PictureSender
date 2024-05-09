@@ -7,8 +7,6 @@ import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -27,13 +25,19 @@ public class ServerSelectionActivity extends AppCompatActivity{
 
 
 
-    private ListenerSocket _listenerSocket;
+    private BroadcastListenerSocket _listenerSocket;
 
 
     WifiManager wm = null;
     WifiManager.MulticastLock multicastLock = null;
 
     public static final int SELECTION_CODE = 4;
+
+    private ListenerSocket _permissionForImageSocket;
+
+    private Intent _returnIntent;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +50,9 @@ public class ServerSelectionActivity extends AppCompatActivity{
         setContentView(R.layout.activity_server_selection);
 
         CheckPermissions();
-        _listenerSocket = new ListenerSocket(23499, ";;;");
+        _listenerSocket = new BroadcastListenerSocket(23499, ";;;");
         StartListening(this);
+        _permissionForImageSocket = new ListenerSocket(CreateOnImagePermissionReceived());
     }
     private boolean CheckCorrectPermissions(){
         return Build.VERSION.SDK_INT > Build.VERSION_CODES.S;
@@ -64,12 +69,11 @@ public class ServerSelectionActivity extends AppCompatActivity{
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which){
                             case DialogInterface.BUTTON_POSITIVE:
-                                Intent returnIntent = new Intent();
-                                returnIntent.putExtra("ip", ip);
+                                _returnIntent = new Intent();
+                                _returnIntent.putExtra("ip", ip);
 
-                                setResult(Activity.RESULT_OK, returnIntent);
+                                setResult(Activity.RESULT_OK, _returnIntent);
                                 _listenerSocket.Close();
-                                finish();
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
@@ -158,7 +162,7 @@ public class ServerSelectionActivity extends AppCompatActivity{
     }
 
     private void StartListening(Context context){
-        _listenerSocket.StartListening(new GetIpCallBack() {
+        _listenerSocket.StartListening(new GetIPCallBack() {
             @Override
             public void GetIp(String ip4) {
                 ShowPrompt(context, ip4);
@@ -183,6 +187,15 @@ public class ServerSelectionActivity extends AppCompatActivity{
     protected void onPause() {
         super.onPause();
         if(multicastLock != null && multicastLock.isHeld()) multicastLock.release();
+    }
+
+    public OnImageCommandReceived CreateOnImagePermissionReceived(){
+        return new OnImageCommandReceived() {
+            @Override
+            public void OnCommandReceived() {
+                finish();
+            }
+        };
     }
 
 }
