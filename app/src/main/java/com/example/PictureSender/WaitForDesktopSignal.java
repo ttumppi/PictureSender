@@ -1,6 +1,7 @@
 package com.example.PictureSender;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,16 +12,14 @@ public class WaitForDesktopSignal extends Fragment {
 
 
 
-    private ListenerSocket _listener;
+
     private OnImageCommandReceived _onCommandReceived;
 
     public WaitForDesktopSignal() {
         // Required empty public constructor
     }
 
-    public WaitForDesktopSignal(OnImageCommandReceived callBack){
-        _onCommandReceived = callBack;
-    }
+
 
 
 
@@ -29,31 +28,23 @@ public class WaitForDesktopSignal extends Fragment {
         super.onCreate(savedInstanceState);
 
 
-        CreateListenerSocket();
-        _listener.Start();
+
     }
 
-    private OnImageCommandReceived CreateOnImageCallBack(){
-        return new OnImageCommandReceived() {
-            @Override
-            public void OnCommandReceived() {
-                _onCommandReceived.OnCommandReceived();
-            }
-        };
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_wait_for_desktop_signal, container, false);
+        // Initialize views or perform other setup here
+        return rootView;
     }
 
 
-    private void CreateListenerSocket(){
-        try{
-            Thread socketCreation = new Thread(()->{
-                _listener = new ListenerSocket(CreateOnImageCallBack());
-            });
-            socketCreation.start();
-            socketCreation.join();
-        }
-        catch(Exception e){}
 
-    }
+
+
+
+
+
 
 
 

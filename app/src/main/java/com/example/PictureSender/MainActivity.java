@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private String _ip;
 
     private WaitForDesktopSignal _waitForDesktopSignalFrag;
+    private ListenerSocket _listener;
 
-    private FragmentTransaction _fragTransaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,30 +45,12 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        _waitForDesktopSignalFrag = new WaitForDesktopSignal(new OnImageCommandReceived() {
-            @Override
-            public void OnCommandReceived() {
-                HideWaitForDesktopSignalFrag();
-            }
-        });
-
-
-        FragmentManager fragManager = getSupportFragmentManager();
-
-        _fragTransaction = fragManager.beginTransaction();
-
-        _fragTransaction.replace(R.id.fragmentContainerView3, _waitForDesktopSignalFrag);
-
-        _fragTransaction.commit();
-
-
+        findViewById(R.id.CameraImage).setClickable(true);
 
         HideWaitForDesktopSignalFrag();
-
+        CreateListenerSocket();
+        _listener.Start();
         StartServerSearchActivity();
-
-
-
 
         _openCameraImage = findViewById(R.id.CameraImage);
 
@@ -77,13 +59,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 runOnUiThread(()-> {
-                    HideWaitForDesktopSignalFrag();
+                    StartImageCapture();
                 });
             }
         });
 
         _client = new ClientSocket(_endMessage);
 
+
+    }
+
+    private void CreateListenerSocket(){
+        try{
+            Thread socketCreation = new Thread(()->{
+                _listener = new ListenerSocket(new OnImageCommandReceived() {
+                    @Override
+                    public void OnCommandReceived() {
+                        HideWaitForDesktopSignalFrag();
+                    }
+                });
+            });
+            socketCreation.start();
+            socketCreation.join();
+        }
+        catch(Exception e){}
 
     }
 
@@ -122,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == CAMERACODE && resultCode == Activity.RESULT_OK) {
 
             SendImage(data);
-
+            ShowWaitForDesktopSignalFrag();
         }
 
         if (requestCode == CAMERACODE && resultCode == Activity.RESULT_CANCELED){
@@ -141,12 +140,18 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void HideWaitForDesktopSignalFrag(){
-        _fragTransaction.hide(_waitForDesktopSignalFrag);
+        runOnUiThread(()->{
+            findViewById(R.id.WaitForDesktopSignalContainer).setVisibility(View.GONE);
+            findViewById(R.id.CameraImage).setClickable(true);
+        });
+
     }
 
     private void ShowWaitForDesktopSignalFrag(){
-       _fragTransaction.show(_waitForDesktopSignalFrag);
-
+        runOnUiThread(()->{
+            findViewById(R.id.WaitForDesktopSignalContainer).setVisibility(View.VISIBLE);
+        });
+        findViewById(R.id.CameraImage).setClickable(false);
     }
 
     private void EstablishConnection(){

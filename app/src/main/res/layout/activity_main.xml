@@ -23,11 +23,17 @@
             android:layout_height="103dp" android:name="com.example.PictureSender.TopOfScreenFrag"
             android:id="@+id/TopOfScreenContainer"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp" app:layout_constraintHorizontal_bias="0.842"/>
     <androidx.fragment.app.FragmentContainerView
-            android:layout_width="412dp"
-            android:layout_height="529dp" android:name="com.example.PictureSender.WaitForDesktopSignal"
-            android:id="@+id/fragmentContainerView3" tools:layout_editor_absoluteY="202dp"
-            tools:layout_editor_absoluteX="-1dp"/>
+            android:layout_width="396dp"
+            android:layout_height="686dp" android:name="com.example.PictureSender.WaitForDesktopSignal"
+            android:id="@+id/WaitForDesktopSignalContainer"
+            android:clickable="false"
+            tools:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@+id/TopOfScreenContainer"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
