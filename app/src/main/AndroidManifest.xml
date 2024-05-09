@@ -22,24 +22,23 @@
     <uses-permission
             android:name="android.permission.INTERNET"
             android:required="true"/>
-
-
-
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
-    <!-- If your app targets Android 13 (API level 33)
-         or higher, you must declare the NEARBY_WIFI_DEVICES permission. -->
-    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
-                     android:usesPermissionFlags="neverForLocation" />
-
-    <!-- If your app derives location information from
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <!--
+ If your app targets Android 13 (API level 33)
+         or higher, you must declare the NEARBY_WIFI_DEVICES permission.
+    -->
+    <uses-permission
+            android:name="android.permission.NEARBY_WIFI_DEVICES"
+            android:usesPermissionFlags="neverForLocation"/>
+    <!--
+ If your app derives location information from
          Wi-Fi APIs, don't include the "usesPermissionFlags"
-         attribute. -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
-
+         attribute.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
 
     <application
             android:allowBackup="true"
@@ -51,6 +50,11 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.MyApplication"
             tools:targetApi="31">
+        <activity
+                android:name=".ListenToDesktopActivity"
+                android:exported="false"
+                android:label="@string/title_activity_listen_to_desktop"
+                android:theme="@style/Theme.MyApplication"/>
         <activity
                 android:name=".ServerSelectionActivity"
                 android:exported="false"

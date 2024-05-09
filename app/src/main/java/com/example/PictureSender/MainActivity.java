@@ -12,6 +12,8 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -33,15 +35,39 @@ public class MainActivity extends AppCompatActivity {
 
     private String _ip;
 
+    private WaitForDesktopSignal _waitForDesktopSignalFrag;
 
+    private FragmentTransaction _fragTransaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_main);
+
+        _waitForDesktopSignalFrag = new WaitForDesktopSignal(new OnImageCommandReceived() {
+            @Override
+            public void OnCommandReceived() {
+                HideWaitForDesktopSignalFrag();
+            }
+        });
+
+
+        FragmentManager fragManager = getSupportFragmentManager();
+
+        _fragTransaction = fragManager.beginTransaction();
+
+        _fragTransaction.replace(R.id.fragmentContainerView3, _waitForDesktopSignalFrag);
+
+        _fragTransaction.commit();
+
+
+
+        HideWaitForDesktopSignalFrag();
+
         StartServerSearchActivity();
 
-        setContentView(R.layout.activity_main);
+
 
 
         _openCameraImage = findViewById(R.id.CameraImage);
@@ -50,7 +76,9 @@ public class MainActivity extends AppCompatActivity {
         _openCameraImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StartImageCapture();
+                runOnUiThread(()-> {
+                    HideWaitForDesktopSignalFrag();
+                });
             }
         });
 
@@ -66,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
 
 
     private void StartImageCapture() {
@@ -93,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == CAMERACODE && resultCode == Activity.RESULT_OK) {
 
             SendImage(data);
-            StartServerSearchActivity();
+
         }
 
         if (requestCode == CAMERACODE && resultCode == Activity.RESULT_CANCELED){
@@ -101,14 +130,22 @@ public class MainActivity extends AppCompatActivity {
         }
         if (requestCode == ServerSelectionActivity.SELECTION_CODE & resultCode == Activity.RESULT_OK){
             _ip = data.getStringExtra("ip");
+
+            ShowWaitForDesktopSignalFrag();
             EstablishConnection();
-            SendHandshake();
             StartPolling();
         }
 
 
+    }
 
 
+    private void HideWaitForDesktopSignalFrag(){
+        _fragTransaction.hide(_waitForDesktopSignalFrag);
+    }
+
+    private void ShowWaitForDesktopSignalFrag(){
+       _fragTransaction.show(_waitForDesktopSignalFrag);
 
     }
 
@@ -177,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                     ShowNotificationWithOK("Connection failed");
                 }
                 catch(Exception e){
-                   ShowNotificationWithOK("Connection to server has closed",
+                   ShowNotificationWithOK(e.getMessage(),
                            CreateOnClickForListeningToConnections());
                 }
             }).start();

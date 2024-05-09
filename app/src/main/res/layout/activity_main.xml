@@ -21,8 +21,13 @@
     <androidx.fragment.app.FragmentContainerView
             android:layout_width="412dp"
             android:layout_height="103dp" android:name="com.example.PictureSender.TopOfScreenFrag"
-            android:id="@+id/fragmentContainerView"
+            android:id="@+id/TopOfScreenContainer"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
+    <androidx.fragment.app.FragmentContainerView
+            android:layout_width="412dp"
+            android:layout_height="529dp" android:name="com.example.PictureSender.WaitForDesktopSignal"
+            android:id="@+id/fragmentContainerView3" tools:layout_editor_absoluteY="202dp"
+            tools:layout_editor_absoluteX="-1dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

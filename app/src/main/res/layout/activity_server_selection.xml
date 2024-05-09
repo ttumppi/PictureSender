@@ -22,7 +22,7 @@
         <androidx.fragment.app.FragmentContainerView
                 android:layout_width="412dp"
                 android:layout_height="103dp" android:name="com.example.PictureSender.TopOfScreenFrag"
-                android:id="@+id/fragmentContainerView"
+                android:id="@+id/TopOfScreenContainer"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
                 tools:layout="@layout/fragment_top_of_screen"/>

@@ -33,9 +33,9 @@ public class ServerSelectionActivity extends AppCompatActivity{
 
     public static final int SELECTION_CODE = 4;
 
-    private ListenerSocket _permissionForImageSocket;
 
-    private Intent _returnIntent;
+
+
 
 
 
@@ -52,7 +52,7 @@ public class ServerSelectionActivity extends AppCompatActivity{
         CheckPermissions();
         _listenerSocket = new BroadcastListenerSocket(23499, ";;;");
         StartListening(this);
-        _permissionForImageSocket = new ListenerSocket(CreateOnImagePermissionReceived());
+
     }
     private boolean CheckCorrectPermissions(){
         return Build.VERSION.SDK_INT > Build.VERSION_CODES.S;
@@ -69,11 +69,15 @@ public class ServerSelectionActivity extends AppCompatActivity{
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which){
                             case DialogInterface.BUTTON_POSITIVE:
-                                _returnIntent = new Intent();
-                                _returnIntent.putExtra("ip", ip);
 
-                                setResult(Activity.RESULT_OK, _returnIntent);
+                                SendAccept(ip);
+
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra("ip", ip);
+
+                                setResult(Activity.RESULT_OK, returnIntent);
                                 _listenerSocket.Close();
+                                finish();
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
@@ -189,14 +193,18 @@ public class ServerSelectionActivity extends AppCompatActivity{
         if(multicastLock != null && multicastLock.isHeld()) multicastLock.release();
     }
 
-    public OnImageCommandReceived CreateOnImagePermissionReceived(){
-        return new OnImageCommandReceived() {
-            @Override
-            public void OnCommandReceived() {
-                finish();
-            }
-        };
+    private void SendAccept(String ip){
+        try{
+            Thread sendAccept = new Thread(()-> {
+                _listenerSocket.Accept(ip);
+            });
+            sendAccept.start();
+            sendAccept.join();
+        }
+        catch(Exception e){}
+
     }
+
 
 }
 

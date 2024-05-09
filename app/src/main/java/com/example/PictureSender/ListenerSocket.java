@@ -1,8 +1,5 @@
 package com.example.PictureSender;
 
-import android.net.wifi.p2p.WifiP2pManager;
-import android.util.Xml;
-
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +31,7 @@ public class ListenerSocket {
     }
 
     public void Start(){
+        _running = true;
         _thread.start();
     }
 
@@ -56,9 +54,9 @@ public class ListenerSocket {
                }
 
                if (DataAvailable(comm)){
-                   _onCommand.OnCommandReceived();
-                   ClearInputStream(comm);
+                   ReadInputStream(comm);
                    SendAcknowledge(comm);
+                   _onCommand.OnCommandReceived();
                }
 
            }
@@ -73,17 +71,27 @@ public class ListenerSocket {
         return false;
     }
 
-    private void ClearInputStream(Socket socket){
+    private void ReadInputStream(Socket socket){
         try{
-            while (socket.getInputStream().read() != -1){
+            byte[] messages = new byte[0];
+            byte[] message = new byte[socket.getInputStream().available()];
+            while (socket.getInputStream().read(message) != -1){
+               messages = AppendArrays(messages, message);
+
+                if (CheckEndOfMessage(messages)){
+                    break;
+                }
 
             }
         }
-        catch (Exception e){}
+        catch (Exception e){
+            String ex = e.getMessage();
+        }
     }
 
     private void SendAcknowledge(Socket socket){
         try{
+
             socket.getOutputStream().write(_endMessageInBytes);
             socket.getOutputStream().flush();
         }
@@ -106,5 +114,27 @@ public class ListenerSocket {
             _socket.close();
         }
         catch(Exception e){}
+    }
+
+    private boolean CheckEndOfMessage(byte[] message){
+        int startIndex = _endMessageInBytes.length -1;
+        for (int i = message.length -1; i > message.length - _endMessageInBytes.length; i--){
+            if (_endMessageInBytes[startIndex] != message[i]){
+                return false;
+            }
+            startIndex--;
+        }
+        return true;
+    }
+
+    private byte[] AppendArrays(byte[] appendTo, byte[] appendFrom){
+        byte[] combined = new byte[appendTo.length + appendFrom.length];
+        int startIndex = 0;
+
+        System.arraycopy(appendTo, 0, combined, startIndex, appendTo.length);
+        startIndex += appendTo.length;
+
+        System.arraycopy(appendFrom, 0, combined, startIndex, appendFrom.length);
+        return combined;
     }
 }

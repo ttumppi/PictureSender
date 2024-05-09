@@ -80,4 +80,18 @@ public class BroadcastListenerSocket {
     public void Close(){
         _serverSocket.close();
     }
+
+    public void Accept(String ip){
+        try{
+            StringBuilder builder = new StringBuilder();
+            builder.append("IP_");
+            builder.append(_endOfMessage);
+
+            Socket comm = new Socket(ip, 23399);
+            comm.getOutputStream().write(builder.toString().getBytes(StandardCharsets.UTF_8));
+            comm.getOutputStream().flush();
+            comm.close();
+        }
+        catch (Exception e){}
+    }
 }
