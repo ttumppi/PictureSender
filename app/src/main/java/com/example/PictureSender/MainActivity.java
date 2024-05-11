@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.CameraImage).setClickable(true);
+
 
         HideWaitForDesktopSignalFrag();
         CreateListenerSocket();
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     private void HideWaitForDesktopSignalFrag(){
         runOnUiThread(()->{
             findViewById(R.id.WaitForDesktopSignalContainer).setVisibility(View.GONE);
-            findViewById(R.id.CameraImage).setClickable(true);
+
         });
 
     }
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(()->{
             findViewById(R.id.WaitForDesktopSignalContainer).setVisibility(View.VISIBLE);
         });
-        findViewById(R.id.CameraImage).setClickable(false);
+
     }
 
     private void EstablishConnection(){

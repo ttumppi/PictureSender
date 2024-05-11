@@ -17,7 +17,9 @@
             android:scaleType="center" android:layout_marginEnd="172dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.526" app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:clickable="true"/>
+
     <androidx.fragment.app.FragmentContainerView
             android:layout_width="410dp"
             android:layout_height="87dp" android:name="com.example.PictureSender.TopOfScreenFrag"
@@ -29,7 +31,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp" android:name="com.example.PictureSender.WaitForDesktopSignal"
             android:id="@+id/WaitForDesktopSignalContainer"
-            android:clickable="false"
+            android:clickable="true"
             tools:visibility="visible"
             app:layout_constraintTop_toBottomOf="@+id/TopOfScreenContainer"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
