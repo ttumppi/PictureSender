@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="false"
-        tools:context=".MainActivity" android:id="@+id/coordinatorLayout">
+        tools:context=".MainActivity" android:id="@+id/coordinatorLayout" android:background="@color/white">
 
     <ImageView
             android:layout_width="86dp"
@@ -19,15 +19,15 @@
             app:layout_constraintHorizontal_bias="0.526" app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="16dp"/>
     <androidx.fragment.app.FragmentContainerView
-            android:layout_width="412dp"
-            android:layout_height="103dp" android:name="com.example.PictureSender.TopOfScreenFrag"
+            android:layout_width="410dp"
+            android:layout_height="87dp" android:name="com.example.PictureSender.TopOfScreenFrag"
             android:id="@+id/TopOfScreenContainer"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="4dp" app:layout_constraintHorizontal_bias="0.842"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
     <androidx.fragment.app.FragmentContainerView
-            android:layout_width="396dp"
-            android:layout_height="686dp" android:name="com.example.PictureSender.WaitForDesktopSignal"
+            android:layout_width="0dp"
+            android:layout_height="0dp" android:name="com.example.PictureSender.WaitForDesktopSignal"
             android:id="@+id/WaitForDesktopSignalContainer"
             android:clickable="false"
             tools:visibility="visible"

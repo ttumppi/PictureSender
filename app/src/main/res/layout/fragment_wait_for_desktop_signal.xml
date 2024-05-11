@@ -5,16 +5,16 @@
                                                    android:layout_width="match_parent"
                                                    android:layout_height="match_parent"
                                                    tools:context=".WaitForDesktopSignal" android:id="@+id/frameLayout"
-                                                   android:background="#FFFFFF" tools:visibility="visible">
+                                                   android:background="@color/white" tools:visibility="visible">
     <TextView
             android:text="Press &quot;Send Image With App&quot; button on desktop to enable camera button"
             android:layout_width="380dp"
             android:layout_height="158dp" android:id="@+id/InformationText"
-            android:textColor="#2196F3"
+            android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:textSize="20sp"
             android:textAllCaps="true" android:fontFamily="sans-serif"
             app:layout_constraintHorizontal_bias="0.516"
-            tools:layout_editor_absoluteY="195dp"/>
+            app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="286dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

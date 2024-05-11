@@ -10,7 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent" app:layout_anchorGravity="center" android:id="@+id/constraintLayout"
-            app:layout_anchor="@+id/constraintLayout">
+            app:layout_anchor="@+id/constraintLayout" android:background="@color/white">
 
         <TextView
                 android:text="Start Searching for this app on the Desktop application, when a connection is found, a popup will appear"
