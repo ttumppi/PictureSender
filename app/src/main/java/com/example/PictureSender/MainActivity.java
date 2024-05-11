@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                     ShowNotificationWithOK("Connection failed");
                 }
                 catch(Exception e){
-                   ShowNotificationWithOK(e.getMessage(),
+                   ShowNotificationWithOK("Connection lost",
                            CreateOnClickForListeningToConnections());
                 }
             }).start();
